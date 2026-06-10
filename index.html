@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance Portal | Engineering College</title>
+    <link rel="stylesheet" href="style.css?v=9">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader" class="loader-overlay" style="display: none;">
+        <div class="loader-spinner"></div>
+        <p>Connecting to Server...</p>
+    </div>
+
+    <!-- Login Page Container -->
+    <div id="login-container" class="login-page">
+        <div class="login-card animate-fade">
+            <div class="login-header">
+                <img src="assets/logo.png" alt="College Logo" class="college-logo">
+                <h2 class="brand-title">YASHODA TECHNICAL CAMPUS, SATARA</h2>
+                <p>Smart Attendance System</p>
+            </div>
+            
+            <!-- Dual Login Tab Selector -->
+            <div class="login-tabs">
+                <button type="button" class="login-tab active" id="tab-student" data-role="student">Student</button>
+                <button type="button" class="login-tab" id="tab-admin" data-role="admin">Admin</button>
+            </div>
+
+            <form id="login-form">
+                <!-- Role Specific Inputs -->
+                <div class="form-group" id="group-roll">
+                    <label for="login-roll">Roll Number</label>
+                    <input type="text" id="login-roll" placeholder="Enter Roll No (e.g. 01)" required>
+                </div>
+                <div class="form-group" id="group-username" style="display: none;">
+                    <label for="login-username">Admin Username</label>
+                    <input type="text" id="login-username" placeholder="Enter Admin Username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <div class="form-options">
+                    <label><input type="checkbox"> Remember Me</label>
+                    <a href="#" class="forgot-pwd">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <div id="login-error" class="error-msg"></div>
+            <div class="author-credits">
+                Author: <strong>Cynder Labs</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container (Hidden by default) -->
+    <div id="app-container" class="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="assets/logo.png" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;">
+                <span>Smart Attend</span>
+            </div>
+            <ul class="nav-links">
+                <!-- Student-Only Navigation Items -->
+                <li class="nav-item student-only">
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item student-only">
+                    <a href="#subjects" class="nav-link" data-page="subjects">
+                        <i class="fas fa-book-open"></i>
+                        <span>Subjects</span>
+                    </a>
+                </li>
+                <li class="nav-item student-only">
+                    <a href="#history" class="nav-link" data-page="history">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+                <li class="nav-item student-only">
+                    <a href="#analytics" class="nav-link" data-page="analytics">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item student-only">
+                    <a href="#profile" class="nav-link" data-page="profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+
+                <!-- Admin-Only Navigation Items -->
+                <li class="nav-item admin-only">
+                    <a href="#admin-dashboard" class="nav-link" data-page="admin-dashboard">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Admin Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a href="#admin-register" class="nav-link" data-page="admin-register">
+                        <i class="fas fa-table"></i>
+                        <span>Class Register</span>
+                    </a>
+                </li>
+                <li class="nav-item admin-only">
+                    <a href="#admin-directory" class="nav-link" data-page="admin-directory">
+                        <i class="fas fa-users"></i>
+                        <span>Student Directory</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sign Out</span>
+                </a>
+                <div class="sidebar-author">
+                    Author: Cynder Labs
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="page-title">
+                    <h1 id="view-title">Dashboard</h1>
+                    <p id="view-subtitle" class="text-muted">Welcome back, <span id="student-name">...</span></p>
+                </div>
+                <div class="header-actions">
+                    <button id="theme-toggle" class="btn-icon">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="profile-info text-right">
+                            <div class="name-bold" id="header-name">Student Name</div>
+                            <div class="text-xs text-muted" id="header-prn">PRN: 0000000</div>
+                        </div>
+                        <img src="assets/aryan_1.jpg" alt="User" class="profile-img" id="header-photo">
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-area">
+                <!-- Content will be injected here by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Student Modal (Admin only) -->
+    <div id="edit-student-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card animate-fade">
+            <div class="modal-header">
+                <h3>Edit Student Details</h3>
+                <button class="btn-close-modal" id="close-edit-modal" type="button">&times;</button>
+            </div>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-student-roll-key">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-student-name">Full Name</label>
+                        <input type="text" id="edit-student-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-student-roll">Roll Number</label>
+                        <input type="text" id="edit-student-roll" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-student-prn">PRN Number</label>
+                        <input type="text" id="edit-student-prn" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-student-phone">Parent Phone</label>
+                        <input type="tel" id="edit-student-phone" required pattern="[0-9]{10}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-student-password">Password</label>
+                        <input type="text" id="edit-student-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-student-photo">Photo URL or Base64</label>
+                        <input type="text" id="edit-student-photo" placeholder="https://...">
+                        <div class="file-upload-wrapper" style="margin-top: 0.5rem;">
+                            <label class="btn-file-upload">
+                                <i class="fas fa-upload"></i> Upload Image File
+                                <input type="file" id="edit-student-file" accept="image/*" style="display: none;">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancel-edit-modal">Cancel</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 0.75rem 1.5rem;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Modules -->
+    <script type="module" src="js/config.js?v=9"></script>
+    <script type="module" src="js/app.js?v=9"></script>
+
+    <style>
+        /* Specific Styles for Login and Inline Utilities not in main CSS */
+        .login-page {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--primary-dark) 100%);
+        }
+        .login-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+        .login-header { text-align: center; margin-bottom: 1.5rem; }
+        .college-logo { width: 80px; margin-bottom: 1rem; }
+        
+        /* Login Tabs styling */
+        .login-tabs {
+            display: flex;
+            background: var(--bg-main);
+            padding: 0.25rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        .login-tab {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+        .login-tab.active {
+            background: var(--bg-card);
+            color: var(--primary-main);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
+        .form-group input { 
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); 
+            border-radius: var(--radius-md); outline: none; transition: var(--transition);
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+        .form-group input:focus { border-color: var(--primary-main); box-shadow: 0 0 0 3px var(--primary-light); }
+        .btn-primary { 
+            width: 100%; padding: 0.75rem; background: var(--primary-main); color: white; 
+            border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.875rem; }
+        .forgot-pwd { color: var(--primary-main); text-decoration: none; font-weight: 600; }
+        .error-msg { color: var(--danger); font-size: 0.875rem; text-align: center; margin-top: 1rem; min-height: 1.25rem; }
+        .btn-icon { background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: var(--radius-md); cursor: pointer; color: var(--text-main); }
+        .text-right { text-align: right; }
+        .name-bold { font-weight: 700; font-size: 0.95rem; }
+        .text-xs { font-size: 0.75rem; }
+
+        /* Role-based Dynamic Link Display */
+        body.role-student .admin-only {
+            display: none !important;
+        }
+        body.role-admin .student-only {
+            display: none !important;
+        }
+
+        /* Modal Overlay and Card Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 550px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-main);
+        }
+        .modal-header h3 {
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .btn-close-modal {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .btn-close-modal:hover {
+            color: var(--danger);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+        @media (max-width: 500px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-main);
+            border-top: 1px solid var(--border-color);
+        }
+        .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            background: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-secondary:hover {
+            background: var(--text-muted);
+            color: white;
+        }
+        .btn-file-upload {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            color: var(--primary-main);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px dashed var(--primary-main);
+        }
+        .btn-file-upload:hover {
+            background: var(--primary-main);
+            color: white;
+        }
+
+        /* Register spreadsheet styles */
+        .register-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 70vh;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            background: var(--bg-card);
+        }
+        .register-table {
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 1200px;
+        }
+        .register-table th, .register-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .register-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .register-table th:first-child, .register-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 12;
+            background: var(--bg-card);
+            font-weight: bold;
+        }
+        .register-table th:nth-child(2), .register-table td:nth-child(2) {
+            position: sticky;
+            left: 60px;
+            z-index: 12;
+            background: var(--bg-card);
+            font-weight: bold;
+            text-align: left;
+        }
+        .register-select {
+            background: transparent;
+            border: none;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px 5px;
+            width: 100%;
+            color: var(--text-main);
+        }
+        .register-select:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .register-select.p-status {
+            color: #10b981;
+            background: #10b98115;
+        }
+        .register-select.a-status {
+            color: #ef4444;
+            background: #ef444415;
+        }
+        .register-select.unmarked-status {
+            color: var(--text-muted);
+        }
+    </style>
+</body>
+</html>
